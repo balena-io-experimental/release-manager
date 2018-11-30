@@ -1,0 +1,23 @@
+{
+  "name": "play-ts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node dist/index.js",
+    "build": "tsc ."
+  },
+  "keywords": [],
+  "author": "Shaun Mulligan <shaun@resin.io>",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^10.11.0",
+    "typescript": "^3.0.3"
+  },
+  "dependencies": {
+    "balena-sdk": "^11.2.0",
+    "body-parser": "^1.18.3",
+    "truthy": "0.0.1"
+  }
+}
