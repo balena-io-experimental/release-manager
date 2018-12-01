@@ -78,6 +78,9 @@ return example:
 
 Returns a list of devices associated with the application
 
+optional query params:
+tag: <Any device tag value>
+
 return example:
 ```
 {
