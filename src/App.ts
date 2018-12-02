@@ -236,13 +236,23 @@ class App {
       }
     })
 
-    router.get('/:appid/schedulerelease', (req, res) => {
+    router.post('/:appid/schedule', (req, res) => {
       var app = Number(req.params.appid);
-      var date = new Date(2018, 10, 30, 16, 30, 0, 0);
-      console.log("scheduling release for ", date.toLocaleString())
-      var j = schedule.scheduleJob(date.toLocaleString(), function(){
-        console.log('Setting new release for App: ', app);
+      var release = req.body.release;
+      var reqDatetime = String(req.body.datetime);
+      var datetime = new Date(reqDatetime);
+      console.log("scheduling release %s on %s at %s",release ,app , datetime.toLocaleString())
+      var j = schedule.scheduleJob(datetime.toLocaleString(), () => {
+        this.setDefaultAppRelease(app, release)
+          .then(() => {
+            console.log('Deloy new Default release %s on App %s ',release , app);
+          }).catch(() => {
+            console.log("Error deploying release %s to App %s", release, app);
+          });
       });
+      res.json({
+        message: "release "+ release + " on App "+ app +" scheduled for "+datetime
+      })
     })
 
     // Get list of release for an app

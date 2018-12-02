@@ -12,7 +12,7 @@
 
 Checks what account the server is performing actions as.
 
-return example:
+**return example:**
 ```
 {
     "account": "shaun_projects"
@@ -23,7 +23,7 @@ return example:
 
 Fetches a list of the releases for a application defined by appid
 
-return example:
+**return example:**
 ```
 {
     "releases": [
@@ -47,7 +47,7 @@ return example:
 
 Get the status of whether or not your application has rolling releases (release tracking) enabled.
 
-return example:
+**return example:**
 ```
 {
     "releaseTracking": false
@@ -58,19 +58,37 @@ return example:
 
 Allows enabling/disabling release tracking. It optionally allows you to set the releaseHash of the default application release when disabling release tracking.
 
-request Header:
+**request Header:**
 - Content-Type: application/x-www-form-urlencoded
 
-request body:
+**request body:**
 - status: `<bool>`
 - releaseHash: `<releaseHash>`
 
 The releaseHash field is **optional** and when left out, the application will be pinned to the most recently built release.
 
-return example:
+**return example:**
 ```
 {
     "releaseTracking": false
+}
+```
+
+### `POST` /:appid/schedule
+
+Allow scheduling moving the default release of an app sometime in the future.
+
+**request Header:**
+- Content-Type: application/x-www-form-urlencoded
+
+**request body:**
+- release: `<releaseHash>`
+- datetime: `ISO 8601 format according to universal time`
+
+**return example:**
+```
+{
+    "message": "release 7ec70eabf84ef3c030e908b8913d44a6 on App 1311607 scheduled for Sat Dec 01 2018 16:40:00 GMT-0800 (Pacific Standard Time)"
 }
 ```
 
@@ -78,10 +96,10 @@ return example:
 
 Returns a list of devices associated with the application
 
-optional query params:
-tag: <Any device tag value>
+**optional query params:**
+- tag: `<Any device tag value>`
 
-return example:
+**return example:**
 ```
 {
     "devices": [
