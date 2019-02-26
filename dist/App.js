@@ -61,14 +61,30 @@ class App {
             return Promise.reject(err);
         });
     }
-    setRelease(appId, fullReleaseHash, tag) {
+    setDevicesRelease(appId, fullReleaseHash, tag) {
+        let promises = [];
+        this.getDeviceList(appId, tag).then(devices => {
+            promises = devices.forEach(device => {
+                return this.sdk.models.device.pinToRelease(device.uuid, fullReleaseHash)
+                    .then(function () {
+                    console.log("pinning device ", device.uuid, " to release ", fullReleaseHash);
+                    return Promise.resolve(device);
+                });
+            });
+        });
+        return Promise.all(promises);
     }
     resetDevicesToAppRelease(appId, tag) {
-        let promises = this.getDeviceList(appId, tag).then(devices => {
-            devices.forEach(device => {
-                this.sdk.models.device.trackApplicationRelease(device.uuid)
+        let promises = [];
+        this.getDeviceList(appId, tag).then(devices => {
+            promises = devices.forEach(device => {
+                return this.sdk.models.device.trackApplicationRelease(device.uuid)
                     .then(function () {
                     console.log("resetting device: ", device.uuid);
+                    return Promise.resolve(device);
+                }).catch(function (err) {
+                    console.log("error resetting default release for device ", device.uuid);
+                    return Promise.reject(err);
                 });
             });
         });
@@ -272,7 +288,6 @@ class App {
             });
         });
         // Reset app to release tracking and all devices to follow latest
-        // currently will always just return error response
         router.get('/:appid/reset', (req, res) => {
             var app = Number(req.params.appid);
             // TODO: validate the app id
@@ -312,6 +327,41 @@ class App {
                     error: err
                 });
             });
+        });
+        //Set all or a group of devices to a specific release
+        // requires post with releaseHash and optionally tag
+        router.post('/:appid/devices/release', (req, res) => {
+            var app = Number(req.params.appid);
+            // TODO: validate the app id
+            if (!req.body.releaseHash) {
+                console.log("no value set");
+                res.status(400).json({
+                    error: "no request body"
+                });
+            }
+            else {
+                if (req.body.releaseHash) {
+                    // if a release is supplied
+                    var releaseHash = req.body.releaseHash;
+                    var tag = (req.body.tag) ? String(req.body.tag) : '';
+                    this.isValidRelease(app, releaseHash).then((isValid) => {
+                        console.log("isValid: ", isValid);
+                        if (isValid) {
+                            this.setDevicesRelease(app, releaseHash, tag).then(() => {
+                                console.log("ran setDeviceRelease");
+                                res.json({
+                                    message: "ok"
+                                });
+                            });
+                        }
+                        else {
+                            res.json({
+                                error: "release " + releaseHash + " doesn't exist in App " + app
+                            });
+                        }
+                    });
+                }
+            }
         });
         this.express.use(bodyParser.json()); // for parsing application/json
         this.express.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-
