@@ -57,6 +57,7 @@ class App {
 
   // Set the default release on an App
   private setDefaultAppRelease (appId, fullReleaseHash) {
+    // TODO: validate release is part of release list
     return this.sdk.models.application.pinToRelease(appId, fullReleaseHash)
       .then(function() {
         console.log("set default release")
@@ -65,6 +66,22 @@ class App {
         console.log("error setting default release")
         return Promise.reject(err);
       });
+  }
+
+  private setRelease (appId, fullReleaseHash, tag) {
+    
+  }
+
+  private resetDevicesToAppRelease (appId, tag?) {
+    let promises = this.getDeviceList(appId, tag).then(devices => {
+      devices.forEach(device => {
+        this.sdk.models.device.trackApplicationRelease(device.uuid)
+          .then( function() {
+            console.log("resetting device: ", device.uuid)
+          })
+      });
+    })
+    return Promise.all(promises)
   }
 
   // Disable rolling releases and pin default to most recently built release
@@ -272,12 +289,39 @@ class App {
         });
     })
 
+    // Reset app to release tracking and all devices to follow latest
+    // currently will always just return error response
+    router.get('/:appid/reset', (req, res) => {
+      var app = Number(req.params.appid);
+      // TODO: validate the app id
+      var tag = (req.query.tag) ? String(req.query.tag) : '';
+      this.enableReleaseTracking(app)
+          .then(() => {
+            this.resetDevicesToAppRelease(app, tag)
+              .then(function() {
+                res.json({
+                  releaseTracking: true,
+                })
+              })
+              .catch(function(err) {
+                res.json({
+                  error: err
+                })
+              });
+          })
+          .catch(function(err) {
+            res.json({
+              error: err
+            })
+          });
+    })
+
     //Get list of device in app
     router.get('/:appid/devices', (req, res) => {
       var app = Number(req.params.appid);
       // TODO: validate the app id
       var tag = (req.query.tag) ? String(req.query.tag) : '';
-      console.log("query.tag: ",req.query.tag)
+
       this.getDeviceList(app, tag)
         .then(function(list) {
           res.json({
