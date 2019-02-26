@@ -180,6 +180,8 @@ class App {
                 });
             });
         });
+        // Set the application release tracking and optionally
+        // set the app default release
         router.post('/:appid/releasetracking', (req, res) => {
             var app = Number(req.params.appid);
             // TODO: validate the app id
@@ -253,6 +255,7 @@ class App {
                 }
             }
         });
+        // Schedule the app default release to change at a specific time.
         router.post('/:appid/schedule', (req, res) => {
             var app = Number(req.params.appid);
             var release = req.body.release;
