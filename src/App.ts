@@ -16,7 +16,7 @@ class App {
   private getReleaseList (appId) {
     return this.sdk.models.release.getAllByApplication(appId)
         .then(function(releases) {
-          var list = releases.map(function(release) {return {id: release.id, commit: release.commit}})
+          var list = releases.map(function(release) {return {id: release.id, commit: release.commit, created_at: release.created_at}})
           return Promise.resolve(list);
         }).catch(function(err) {
           return Promise.reject(err);
